@@ -1,0 +1,52 @@
+.input-name {
+  margin-top: 50px;
+}
+
+.input-box {
+  padding-left: 15px;
+  line-height: 20px;
+}
+
+.accent-color {
+  color: #d7588d;
+}
+
+/* 이름 specify? className="instruction" */
+p {
+  color: #2a2c38;
+  font-size: 23px;
+  font-weight: bold;
+}
+
+/* 같은 div 안에 있는데 왜 input-name에 설정된 글씨 크기가 안 먹히지? */
+input {
+  font-size: 20px;
+  width: 220px;
+  margin-top: 15px;
+  margin-bottom: 6px;
+  padding: 8px;
+  border: solid 5px #9ab8fa;
+  border-radius: 60px;
+  background-color: white;
+}
+
+.input-mbti {
+  margin-top: 40px;
+  margin-bottom: 50px;
+}
+
+.input-mbti > p > * {
+  vertical-align: middle;
+}
+
+.handclick-crop {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  background-image: url("../images/handclick.gif");
+  background-size: auto 125%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position: relative;
+  bottom: 4px;
+}

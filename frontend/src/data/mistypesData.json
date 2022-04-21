@@ -1,0 +1,81 @@
+[
+  {
+    "id": "INTJ",
+    "mistypes": ["ISTP", "ISFP", "ENTJ"]
+  },
+
+  {
+    "id": "INTP",
+    "mistypes": ["ISTP(-Ti)", "ENTP(-Ti)", "ISFP"]
+  },
+
+  {
+    "id": "ENTJ",
+    "mistypes": ["ESTP", "ESFP"]
+  },
+
+  {
+    "id": "ENTP",
+    "mistypes": ["ISTP(-Ti)", "INTP(-Ne)", "ENFP(-Ne)"]
+  },
+
+  {
+    "id": "INFJ",
+    "mistypes": ["ISFP", "ISTP", "INFP"]
+  },
+
+  {
+    "id": "INFP",
+    "mistypes": ["ENFP(-Fi)", "ISFP", "ISFJ"]
+  },
+
+  {
+    "id": "ENFJ",
+    "mistypes": ["ENFP", "INFJ(-Fe)", "INFP", "ISFP"]
+  },
+
+  {
+    "id": "ENFP",
+    "mistypes": ["INFP(-Ne)", "ESFP(-Fi)", "ESFJ"]
+  },
+
+  {
+    "id": "ISTJ",
+    "mistypes": ["ISTP", "ISFP"]
+  },
+
+  {
+    "id": "ISFJ",
+    "mistypes": ["ISFP", "INFP", "INFJ"]
+  },
+
+  {
+    "id": "ESTJ",
+    "mistypes": ["ENTJ", "ISTJ(-Te)", "ISTP(-Se)"]
+  },
+
+  {
+    "id": "ESFJ",
+    "mistypes": ["ISFJ", "ISFP", "ESFP"]
+  },
+
+  {
+    "id": "ISTP",
+    "mistypes": ["ISTJ", "INTP", "ISFP(-Se)"]
+  },
+
+  {
+    "id": "ISFP",
+    "mistypes": ["ISFJ", "ESFP(-Fi)", "INFP"]
+  },
+
+  {
+    "id": "ESTP",
+    "mistypes": ["ISTP(-Se)", "ENTJ", "ISFP(-Se)"]
+  },
+
+  {
+    "id": "ESFP",
+    "mistypes": ["ISFP(-Se)", "ENFP(-Fi)"]
+  }
+]
