@@ -1,14 +1,23 @@
-import "./MyBingoPage.css";
 import BingoBoard from "../components/BingoBoard";
 import { useState } from "react";
 import VerticalCenter from "../components/VerticalCenter";
 import CuteButton from "../components/CuteButton";
+import { useNavigate } from "react-router-dom";
+import styled, { ThemeProvider } from "styled-components";
+import theme from "../components/styles/Theme";
+import { useUser } from "../contexts/UserContext";
+import { flatten, addMbtiToItems } from "../utils/BoardUtils";
+import LoadingScreen from "../components/LoadingScreen";
+
+const DarkText = styled.div`
+  color: ${(props) => props.theme.darkGrey};
+`;
 
 function MyBingoPage() {
-  const myName = localStorage.getItem("myName");
-  const myMbti = localStorage.getItem("myMbti");
-  // const myMbti = localStorage.getItem("myMbti").join("");
-  // const myMbti = JSON.parse(localStorage.getItem("myMbti"));
+  const navigate = useNavigate();
+  const user = useUser();
+
+  const [loading, setLoading] = useState(false);
 
   const [board, setBoard] = useState([
     new Array(5).fill(false),
@@ -18,43 +27,60 @@ function MyBingoPage() {
     new Array(5).fill(false),
   ]);
 
-  // const clickedCount = clickedArray.filter(Boolean).length;
+  if (!user || loading) {
+    return <LoadingScreen />;
+  }
 
-  // let clickedCount = (array) => {
-  //   let count = 0;
-  //   for (let i = 0; i < board.length; i++) {
-  //     count += array[i].filter(Boolean).length;
-  //   }
-  //   return count;
-  // };
+  const myName = user["name"];
+  const myMbti = user["myMbti"]["mbti"];
+  const uid = user["uid"];
+  const items = user["myMbti"]["items"];
 
   return (
-    <VerticalCenter>
-      <div className="bingo-instruction">
-        {/* 본인에게 해당되는 설명의 칸을 모두 선택한 후 '완료' 버튼을 눌러주세요! */}
-        {myMbti} {myName} 님에게 해당되는 설명의 칸을 <br></br> 모두 선택한 후
-        '완료' 버튼을 눌러주세요!
-      </div>
+    <ThemeProvider theme={theme}>
+      <VerticalCenter>
+        <DarkText>
+          {/* 본인에게 해당되는 설명의 칸을 모두 선택한 후 '완료' 버튼을 눌러주세요! */}
+          {myMbti} {myName} 님에게 해당되는 설명의 칸을 <br></br> 모두 선택한 후
+          '완료' 버튼을 눌러주세요!
+        </DarkText>
 
-      <BingoBoard
-        mbti={myMbti}
-        board={board}
-        onBoardChange={setBoard}
-        show={true}
-      />
+        <BingoBoard
+          items={addMbtiToItems(items, myMbti)}
+          board={board}
+          onBoardChange={setBoard}
+          show={true}
+        />
 
-      <div>
-        <CuteButton
-          to="/mysterybingointro"
-          className="btn mybingo"
-          onClick={(e) =>
-            localStorage.setItem("myMbtiBoard", JSON.stringify(board))
-          }
-        >
-          완료
-        </CuteButton>
-      </div>
-    </VerticalCenter>
+        <div>
+          <CuteButton
+            to="/mysterybingointro"
+            className="btn mybingo"
+            onClick={async (e) => {
+              e.preventDefault();
+              setLoading(true);
+              await fetch("https://api.mbtibingo.com/users", {
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                method: "PATCH",
+                body: JSON.stringify({
+                  uid: uid,
+                  mbti: myMbti,
+                  boardVersion: 1,
+                  selected: flatten(board),
+                }),
+              });
+              setLoading(false);
+              navigate("/mysterybingointro");
+            }}
+          >
+            완료
+          </CuteButton>
+        </div>
+      </VerticalCenter>
+    </ThemeProvider>
   );
 }
 

@@ -1,18 +1,30 @@
-import "./MysteryBingoPage.css";
 import BingoBoard from "../components/BingoBoard";
 import { useState } from "react";
 import VerticalCenter from "../components/VerticalCenter";
 import CuteButton from "../components/CuteButton";
+import { useUser } from "../contexts/UserContext";
+import styled, { ThemeProvider } from "styled-components";
+import theme from "../components/styles/Theme";
+import { useNavigate } from "react-router-dom";
+import LoadingScreen from "../components/LoadingScreen";
+
+const Progress = styled.div`
+  color: ${(props) => props.theme.lightPurple};
+  font-weight: bold;
+  // font-size: 18px;
+`;
 
 function MysteryBingoPage() {
-  const myMistypes = JSON.parse(localStorage.getItem("myMistypes"));
+  const user = useUser();
+  const navigate = useNavigate();
+  const myMistypes = user["mistypes"];
 
+  const [loading, setLoading] = useState(false);
   const [curIndex, setCurIndex] = useState(0);
 
-  let curMbti = myMistypes[curIndex].substring(0, 4);
-
   const [boardArray, setBoardArray] = useState(
-    new Array(myMistypes.length)
+    // new Array(myMistypes.length)
+    new Array(4)
       .fill(false)
       .map((x) => [
         new Array(5).fill(false),
@@ -22,6 +34,19 @@ function MysteryBingoPage() {
         new Array(5).fill(false),
       ])
   );
+
+  if (!user || loading) {
+    return <LoadingScreen />;
+  }
+
+  let getSelectedArray = (board) => {
+    let flattenedArr = board.flat();
+    flattenedArr = [...flattenedArr.slice(0, 12), ...flattenedArr.slice(13)];
+    return flattenedArr.flatMap((bool, index) => (bool ? index : []));
+  };
+
+  const mistypes = user["mistypes"];
+  let curMistype = mistypes[curIndex];
 
   let changeBoardWithIndex = (index) => {
     return (newBoard) => {
@@ -34,8 +59,12 @@ function MysteryBingoPage() {
   let renderBoard = (board, i) => {
     return (
       <BingoBoard
-        mbti={curMbti}
         board={board}
+        items={[
+          ...curMistype.items.slice(0, 12),
+          curMistype.mbti,
+          ...curMistype.items.slice(12),
+        ]}
         onBoardChange={changeBoardWithIndex(i)}
         show={curIndex === i}
         isMysteryBingo={true}
@@ -44,70 +73,49 @@ function MysteryBingoPage() {
   };
 
   return (
-    <VerticalCenter>
-      <div className="progress">
-        {curIndex + 1} / {myMistypes.length}
-      </div>
+    <ThemeProvider theme={theme}>
+      <VerticalCenter>
+        <Progress>
+          {curIndex + 1} / {mistypes.length}
+        </Progress>
 
-      {boardArray.map(renderBoard)}
+        {boardArray.map(renderBoard)}
 
-      <div>
-        <CuteButton
-          to="/results"
-          onClick={(e) => {
-            if (curIndex + 1 < myMistypes.length) {
-              setCurIndex(curIndex + 1);
-              return e.preventDefault();
-            }
+        <div>
+          <CuteButton
+            to="/results"
+            onClick={async (e) => {
+              e.preventDefault();
 
-            localStorage.setItem(
-              "mistypeBoardArray",
-              JSON.stringify(
-                myMistypes.map((mistype, i) => {
-                  return {
-                    mbti: mistype,
-                    board: boardArray[i],
-                  };
-                })
-              )
-            );
-          }}
-        >
-          {curIndex + 1 < myMistypes.length ? "다음" : "완료"}
-        </CuteButton>
-      </div>
+              setLoading(true);
+              await fetch("https://api.mbtibingo.com/users", {
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                method: "PATCH",
+                body: JSON.stringify({
+                  uid: user.uid,
+                  mbti: mistypes[curIndex].mbti,
+                  boardVersion: 1,
+                  selected: getSelectedArray(boardArray[curIndex]),
+                }),
+              });
+              setLoading(false);
 
-      {/* <div>
-        {curIndex < myMistypes.length ? (
-          <Link
-            to="/mysterybingo"
-            className="btn"
-            onClick={(e) => {
-              localStorage.setItem(
-                `mistype${curIndex + 1}Count`,
-                clickedCount(clickedArray)
-              );
-              curIndex++;
+              if (curIndex + 1 < mistypes.length) {
+                setCurIndex(curIndex + 1);
+                // return e.preventDefault();
+              } else {
+                navigate(`/users/${localStorage.getItem("uid")}/results`);
+              }
             }}
           >
-            완료
-          </Link>
-        ) : (
-          <Link
-            to="/results"
-            className="btn"
-            onClick={(e) =>
-              localStorage.setItem(
-                `mistype${curIndex + 1}Count`,
-                clickedCount(clickedArray)
-              )
-            }
-          >
-            완료
-          </Link>
-        )}
-      </div> */}
-    </VerticalCenter>
+            {curIndex + 1 < mistypes.length ? "다음 ➜" : "완료"}
+          </CuteButton>
+        </div>
+      </VerticalCenter>
+    </ThemeProvider>
   );
 }
 

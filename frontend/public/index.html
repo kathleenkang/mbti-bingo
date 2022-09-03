@@ -3,13 +3,82 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MBTI 빙고!</title>
 
+    <!-- Website Description -->
+    <meta name="description" content="`MBTI 빙고`로 나의 진짜 MBTI 찾기" />
+
+    <!-- Search Engine Keyword -->
+    <meta
+      name="keyword"
+      content="내가 알고 있던 나의 MBTI, 과연 진짜가 맞을까요? MBTI 빙고로 나의 ❝진짜❞ 유형을 찾아보세요! 놀랄 수도 있어요 👀"
+    />
+
+    <!-- Social Media Open Graph Information -->
+    <!-- 1200x630 -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="나의 MBTI, 과연 ‘진짜’가 맞을까?" />
+
+    <meta
+      property="og:description"
+      content="빙고로 테스트해보세요! 놀랄 수도 있어요 👀"
+    />
+    <meta
+      property="og:image"
+      content="https://www.mbtibingo.com/heroheader.png"
+    />
+    <meta property="og:url" content="https://mbtibingo.com" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary" />
+    <meta
+      property="twitter:title"
+      content="내가 알고 있던 나의 MBTI, 과연 진짜가 맞을까요?"
+    />
+    <meta
+      property="twitter:description"
+      content="MBTI 빙고로 나의 ‘진짜’ 유형을 찾아보세요! 놀랄 수도 있어요 👀"
+    />
+    <meta
+      property="twitter:image"
+      content="https://www.mbtibingo.com/heroheader.png"
+    />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
     <script
-      type="text/javascript"
-      src="https://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-625f3ff0b65d4a86"
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-DZVPB6YWX1"
     ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-    <title>MBTI빙고</title>
+      gtag("config", "G-DZVPB6YWX1");
+    </script>
+
+    <!-- Kakaotalk Share API -->
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.js"></script> -->
+    <!-- <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <script>
+      Kakao.init("7db1028a00baec9af8dff8297f1dfd77");
+      Kakao.isInitialized();
+    </script> -->
+    <script>
+      window.onload = () => {
+        if (
+          navigator.userAgent.match(/Kakao/i) &&
+          navigator.userAgent.match(/Android/i)
+        ) {
+          location.href =
+            "intent://" +
+            location.href.replace(/https?:\/\//i, "") +
+            "#Intent;scheme=http;package=com.android.chrome;end";
+        }
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>

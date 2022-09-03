@@ -1,12 +1,42 @@
-import "./ProfilePage.css";
 import MbtiCriteria from "../components/MbtiCriteria";
 import { useState } from "react";
-import Swal from "sweetalert2";
-import NyanCat from "../images/nyan-cat.gif";
+import { useNavigate } from "react-router-dom";
 import VerticalCenter from "../components/VerticalCenter";
 import CuteButton from "../components/CuteButton";
+import CuteAlert from "../components/CuteAlert";
+import styled, { ThemeProvider } from "styled-components";
+import theme from "../components/styles/Theme.js";
+import { useSetUser } from "../contexts/UserContext";
+import LoadingScreen from "../components/LoadingScreen";
+
+const Input = styled.input`
+  font-size: 20px;
+  width: 220px;
+  margin-bottom: 30px;
+  padding: 5px;
+  border: solid 5px #9ab8fa;
+  border-radius: 60px;
+  background-color: white;
+  outline: none;
+  padding-left: 15px;
+  line-height: 30px;
+`;
+
+const PinkText = styled.span`
+  color: ${(props) => props.theme.hotpinkAccent};
+  font-weight: bold;
+`;
+
+const DarkText = styled.p`
+  color: ${(props) => props.theme.darkGrey};
+  font-size: 23px;
+  font-weight: 600;
+`;
 
 function ProfilePage() {
+  const navigate = useNavigate();
+  const setUser = useSetUser();
+
   const criteriaArray = [
     {
       criteria: "energy",
@@ -45,91 +75,97 @@ function ProfilePage() {
   const [myName, setMyName] = useState("");
   const [myMbti, setMyMbti] = useState(["", "", "", ""]);
 
+  const [loading, setLoading] = useState(false);
+
   let changeMbti = (event, arrIndex) => {
     let newMbti = [...myMbti];
     newMbti[arrIndex] = event.target.defaultValue;
     setMyMbti(newMbti);
   };
 
-  let showAlert = (title) => {
-    Swal.fire({
-      title: title,
-      width: 350,
-      padding: "1em",
-      color: "#716add",
-      backdrop: `
-        rgba(0,0,123,0.4)
-        url("${NyanCat}")
-        left top
-        no-repeat
-      `,
-    });
-  };
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
-    <VerticalCenter>
-      <div className="input-name">
-        <p>
-          <span className="accent-color">이름</span>을 입력해 주세요
-        </p>
-        <input
-          className="input-box"
+    <ThemeProvider theme={theme}>
+      <VerticalCenter>
+        <DarkText>
+          <PinkText>이름</PinkText>을 입력해 주세요
+        </DarkText>
+        <Input
           type="text"
           onChange={(e) => {
             setMyName(e.target.value);
           }}
         />
-      </div>
 
-      <div className="input-mbti">
-        <p>
-          <span className="accent-color eng">MBTI</span>
-          <span>를 선택해 주세요</span>
-          <div className="handclick-crop" />
-        </p>
+        <div className="input-mbti">
+          <DarkText>
+            <PinkText>MBTI</PinkText>
+            <span>를 선택해 주세요</span>
+            {/* <div className="handclick-crop" /> */}
+          </DarkText>
+
+          <div>
+            {criteriaArray.map((criteria, i) => (
+              <MbtiCriteria
+                key={`criteria${i}`}
+                criteria={criteria.criteria}
+                criterialabel={criteria.criterialabel}
+                leftoption={criteria.leftoption}
+                leftoptionlabel={criteria.leftoptionlabel}
+                rightoption={criteria.rightoption}
+                rightoptionlabel={criteria.rightoptionlabel}
+                arrIndex={i}
+                changeMbti={changeMbti}
+              />
+            ))}
+          </div>
+        </div>
 
         <div>
-          {criteriaArray.map((criteria, i) => (
-            <MbtiCriteria
-              key={`criteria${i}`}
-              criteria={criteria.criteria}
-              criterialabel={criteria.criterialabel}
-              leftoption={criteria.leftoption}
-              leftoptionlabel={criteria.leftoptionlabel}
-              rightoption={criteria.rightoption}
-              rightoptionlabel={criteria.rightoptionlabel}
-              arrIndex={i}
-              changeMbti={changeMbti}
-            />
-          ))}
+          <CuteButton
+            to="/mybingo"
+            onClick={async (e) => {
+              e.preventDefault();
+
+              if (myName === "") {
+                CuteAlert("이름을 기입해주세요!");
+                return;
+              }
+
+              if (myMbti.includes("")) {
+                CuteAlert("4가지 유형을 모두 선택해 주세요!");
+                return;
+              }
+
+              setLoading(true);
+
+              const response = await fetch("https://api.mbtibingo.com/users", {
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                method: "POST",
+                body: JSON.stringify({
+                  uid: Date.now().toString(36) + Math.random().toString(36),
+                  name: myName,
+                  mbti: myMbti.join(""),
+                }),
+              });
+              const body = await response.json();
+              setUser(body);
+              localStorage.setItem("uid", body["uid"]);
+              setLoading(false);
+              navigate("/mybingo");
+            }}
+          >
+            다음 ➜
+          </CuteButton>
         </div>
-      </div>
-
-      <div>
-        <CuteButton
-          to="/mybingo"
-          onClick={(e) => {
-            if (myName === "") {
-              showAlert("이름을 기입해주세요!", e);
-              return e.preventDefault();
-            } else {
-              localStorage.setItem("myName", myName);
-            }
-
-            if (myMbti.includes("")) {
-              showAlert("4가지 유형을 모두 선택해 주세요!");
-              return e.preventDefault();
-            } else {
-              // localStorage.setItem("myMbti", JSON.stringify(myMbti));
-              localStorage.setItem("myMbti", myMbti.join(""));
-              // localStorage.setItem("myMbti", JSON.stringify(myMbti);
-            }
-          }}
-        >
-          👉 next 👉
-        </CuteButton>
-      </div>
-    </VerticalCenter>
+      </VerticalCenter>
+    </ThemeProvider>
   );
 }
 

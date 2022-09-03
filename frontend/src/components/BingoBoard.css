@@ -1,34 +1,5 @@
-/* textalign center 안 했는데 왜 instruction & title 가운데 정렬 돼있는지? */
-
-.frame {
-  background-color: #fc474f;
-  width: 368px;
-  height: 450px;
-  margin: 20px auto 20px auto;
-}
-
 .frame.disabled .square {
   cursor: default;
-}
-
-.frame-title {
-  font-family: "cooper";
-  font-size: 60px;
-  font-weight: bold;
-  color: white;
-  padding: 10px 25px;
-
-  /* !!!타이틀 stretch가 왜 안 되지? */
-  /* text-align: justify; */
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.board-container {
-  width: 355px;
-  height: 340px;
-  margin: auto auto;
 }
 
 .row {
@@ -45,12 +16,12 @@
   margin: 2px;
   flex: 1;
   text-overflow: clip;
-  color: #2a2c38;
-  font-weight: 600;
-  font-size: 12px;
-  /* word-wrap: break-word; */
+  /* color: #2a2c38; */
+  color: black;
+  font-size: 12.5px;
   word-break: keep-all;
   cursor: pointer;
+  font-size: 13px;
 }
 
 .square.long {
@@ -58,11 +29,8 @@
 }
 
 .square.activated {
-  /* background-color: #9ab8fa; */
   background-color: #faf2b3;
   color: #2a2c38;
-  /* background-color: #fa747b;
-  color: white; */
 }
 
 .square.unclickable {
@@ -70,7 +38,13 @@
   color: white;
   font-size: 26px;
   font-weight: bold;
-  /* 아래로 살짝 옮기는 법? */
-  /* 기본 폰트 말고 specify 해주는 게 좋은가? */
   cursor: help;
 }
+
+/* STYLED COMPONENTS */
+/* background-color 3가지 경우의 수 */
+/* background-color: ${unclickable ? "#fa747b" : "white"};
+color: ${unclickable ? "white" : "#2a2c38"}
+font-size: ${unclickable ? "26px" : "12.5px"}
+font-weight: ${unclickable ? "bold" : "regular"}
+cursor: ${unclickable ? "help" : "pointer"}; */

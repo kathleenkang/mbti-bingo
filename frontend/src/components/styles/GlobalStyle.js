@@ -1,4 +1,9 @@
 import { createGlobalStyle } from "styled-components";
+import Cooper from "../../fonts/COOPBL.woff";
+import Dream from "../../fonts/S-Core-Dream/SCDream4.otf";
+import DreamSemiBold from "../../fonts/S-Core-Dream/SCDream5.otf";
+import DreamBold from "../../fonts/S-Core-Dream/SCDream6.otf";
+import Bingre from "../../fonts/BinggraeTaom.otf";
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -7,43 +12,45 @@ const GlobalStyle = createGlobalStyle`
 
   body {
     margin: 0 auto;
-    font-family: roboto;
+    font-family: "dream";
     background-color: #f1f5df;
     text-align: center;
+    
   }
 
   @font-face {
     font-family: "bingre";
-    src: url(./fonts/BinggraeTaom.otf) format("opentype");
+    src: url(${Bingre}) format("opentype");
   }
 
   @font-face {
     font-family: "cooper";
-    font-style: normal;
-    font-weight: normal;
-    src: local("Cooper Black Regular"), url(./fonts/COOPBL.woff) format("woff");
+    src: url(${Cooper}) format("woff");
+    
   }
 
   @font-face {
-    font-family: "noto";
+    font-family: "dream";
     font-style: normal;
     font-weight: normal;
-    src: url(./fonts/Noto_Sans_KR/NotoSansKR-Medium.otf) format("opentype");
+    src: url(${Dream}) format("opentype");
   }
 
   @font-face {
-    font-family: "consolas";
+    font-family: "dream";
     font-style: normal;
-    font-weight: normal;
-    src: url(./fonts/Consolas-Font/CONSOLA.TTF);
+    font-weight: 600;
+    src: url(${DreamSemiBold}) format("opentype");
   }
 
   @font-face {
-    font-family: "roboto";
+    font-family: "dream";
     font-style: normal;
-    font-weight: normal;
-    src: url(./fonts/Roboto/Roboto-Medium.ttf) format("truetype");
+    font-weight: bold;
+    src: url(${DreamBold}) format("opentype");
   }
+
+  
 `;
 
 export default GlobalStyle;

@@ -1,294 +1,300 @@
 import BingoBoard from "../components/BingoBoard";
-import "./ResultsPage.css";
 import Accordion from "../components/Accordion";
 import RankingBoard from "../components/RankingBoard";
 import mbtiProfiles from "../data/mbtiProfiles.json";
 
-import gif from "../images/present.gif";
+import React, { useEffect, useState } from "react";
 
-import definite from "../images/definite.gif";
-import likely from "../images/likely.gif";
-import tie from "../images/tie.gif";
-import surprise from "../images/surprise.gif";
+// import { useUser } from "../contexts/UserContext";
+import ResultsTransition from "../components/results/ResultsTransition";
+import { getSortedSubmissions, getType } from "../utils/ResultsUtils";
+import Reaction from "../components/results/Reaction";
+import ResultsSummary from "../components/results/ResultsSummary";
+import { addMbtiToItems, selectedToFiveByFive } from "../utils/BoardUtils";
+import { useParams } from "react-router-dom";
+import styled, { ThemeProvider } from "styled-components";
+import theme from "../components/styles/Theme";
+import CuteButton from "../components/CuteButton";
+import PositionedDialog from "../components/PositionedDialog";
+import SpeechBubble from "../components/SpeechBubble";
+// import LoadingScreen from "../components/LoadingScreen";
+import AccordionSignature from "../components/Signature";
+// import KakaoShare from "../components/KakaotalkShare";
 
-import React, { useState } from "react";
+// import { Share } from "react-native";
 
-import { Typewriter } from "react-simple-typewriter";
-import VerticalCenter from "../components/VerticalCenter";
-import Container from "../components/styles/Container";
+const BoldText = styled.span`
+  font-weight: bold;
+`;
+
+const PurpleText = styled.span`
+  color: ${(prop) => prop.theme.purpleAccent};
+`;
+
+const Highlight = styled.span`
+  display: inline-block;
+  transform: skewX(-10deg);
+  padding: 4px 3.5px 0px 3.5px;
+  font-weight: bold;
+`;
+
+const HighlightedPinkText = styled(Highlight)`
+  color: ${(props) => props.theme.hotpinkAccent};
+  background-color: ${(props) => props.theme.yellowHighlight};
+`;
+
+const Headline = styled.div`
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 25px;
+  line-height: 40px;
+  margin-top: 30px;
+`;
+
+const Margin = styled.div`
+  margin: 40px 0px;
+`;
+
+const OriginalBingoContainer = styled.div`
+  margin-top: 50px;
+  margin-bottom: 35px;
+`;
+
+const OriginalBingoTitle = styled(Highlight)`
+  font-size: 27px;
+  font-weight: bold;
+  background-color: ${(props) => props.theme.yellowHighlight};
+`;
+
+const Aux = styled.span`
+  color: ${(props) => props.theme.lightGrey};
+  // color: ${(props) => props.theme.lightPurple};
+  // color: #b0aef8;
+  // color: ${(props) => props.theme.purpleAccent};
+  font-size: 20px;
+`;
+
+const WinnerItem = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  // flex-basis: 168px;
+  flex-basis: 180px;
+  flex-grow: 0;
+  flex-shrink: 0;
+`;
+
+const WinnerContainer = styled.div`
+  display: flex;
+  margin: 20px auto;
+  max-width: 375px;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
+
+const WinnerImgContainerSingle = styled.div`
+  width: 300px;
+  height: 225px;
+  overflow: hidden;
+`;
+
+const WinnerImgContainerMultiple = styled(WinnerImgContainerSingle)`
+  width: 110px;
+  height: 81px;
+`;
+
+const WinnerImgSingle = styled.img`
+  width: 300px;
+`;
+
+const WinnerImgSingleMultiple = styled.img`
+  width: 110px;
+`;
+
+const WinnerMbtiNametagSingle = styled(Highlight)`
+  background-color: ${(props) => props.theme.purpleAccent};
+  color: white;
+  font-size: 30px;
+  height: 35px;
+  line-height: 32px;
+  width: 120px;
+  margin: 5px auto;
+`;
+
+const WinnerMbtiNametagMultiple = styled(WinnerMbtiNametagSingle)`
+  font-size: 22px;
+  line-height: 30px;
+`;
+
+const WinnerMbtiNicknameSingle = styled.div`
+  color: ${(props) => props.theme.darkGrey};
+  line-height: 30px;
+  width: 100%;
+  font-size: 16px;
+  font-weight: 400;
+`;
+
+const WinnerMbtiNicknameMultiple = styled(WinnerMbtiNicknameSingle)`
+  font-size: 14.5px;
+  font-weight: 500;
+`;
+
+const MistypeTitle = styled.div`
+  width: 360px;
+  margin: auto auto;
+  display: flex;
+  justify-content: space-between;
+`;
+
+const NthMistype = styled.span`
+  font-size: 23px;
+  font-weight: bold;
+  color: ${(props) => props.theme.purpleAccent};
+  font-family: "Courier New", Courier, monospace;
+  word-spacing: -5px;
+  // line-height: 45px;
+  // display: table-cell;
+  // vertical-align: bottom;
+  // display: flex;
+  // justify-content: flex-end;
+`;
+
+const MistypeName = styled(Highlight)`
+  font-size: 28px;
+  color: ${(props) => props.theme.darkGrey};
+  font-weight: bold;
+  background-color: ${(props) => props.theme.yellowHighlight};
+`;
+
+const Buttons = styled.div`
+  margin: 40px auto;
+`;
+
+const StartOverBtn = styled.a`
+  color: ${(props) => props.theme.purpleAccent};
+  text-decoration: underline wavy;
+  display: block;
+  margin: 40px auto;
+  text-underline-position: under;
+  font-weight: bold;
+`;
+
+const ListItem = styled.div`
+  margin: 6px 0px;
+  display: flex;
+`;
+
+const BulletPoint = styled.div`
+  display: flex-item;
+  margin-right: 10px;
+`;
+
+const CharacteristicContent = styled.div`
+  display: flex-item;
+`;
 
 function ResultsPage() {
-  const myName = localStorage.getItem("myName");
-  const myMbti = localStorage.getItem("myMbti");
-  const myMbtiBoard = JSON.parse(localStorage.getItem("myMbtiBoard"));
-  const myMistypes = JSON.parse(localStorage.getItem("myMistypes"));
-  const mistypeBoardArray = JSON.parse(
-    localStorage.getItem("mistypeBoardArray")
-  );
-
+  const params = useParams();
+  const uid = params.uid;
+  const [results, setResults] = useState(null);
   const [showTransition, setShowTransition] = useState(true);
 
-  setTimeout(() => {
-    setShowTransition(false);
-  }, 2300);
-
-  let renderTransition = () => {
-    return (
-      <div className="transition">
-        <Container>
-          <VerticalCenter>
-            <div className="fixed-text purple">
-              과연 나의{" "}
-              <span className="accent highlight colored">진짜 MBTI</span>는
-              뭘까?
-            </div>
-            <div className="searching-image">
-              <img src={gif} alt="searching" width="100%" />
-            </div>
-            <div className="typewriter">
-              <Typewriter
-                loop="1"
-                cursor
-                cursorStyle=""
-                typeSpeed={80}
-                deleteSpeed={70}
-                delaySpeed={1000}
-                words={["*drumroll*"]}
-              />
-            </div>
-          </VerticalCenter>
-        </Container>
-      </div>
-    );
+  const loadResults = async () => {
+    setTimeout(async () => {
+      const response = await fetch(
+        `https://api.mbtibingo.com/users/${uid}/results`
+      );
+      const body = await response.json();
+      setResults(body);
+    }, 1000);
   };
 
-  let trueCount = (board) => {
-    let count = 0;
-    for (let i = 0; i < board.length; i++) {
-      count += board[i].filter(Boolean).length;
-    }
-    return count;
-  };
+  useEffect(() => {
+    loadResults();
+  }, []);
 
-  // // trueCount map으로 쓰는 법
-  // console.log(
-  //   myMbtiBoard
-  //     .map((row) => row.filter(Boolean).length)
-  //     .reduce((a, b) => a + b, 0)
-  // );
+  const sameUser = uid === localStorage.getItem("uid");
 
-  let myMbtiCount = trueCount(myMbtiBoard);
-
-  let mistypeCount = mistypeBoardArray.map((item, i) => {
-    return {
-      id: item.mbti,
-      count: trueCount(item.board),
-    };
-  });
-
-  let sortByCount = [
-    ...mistypeCount,
-    {
-      id: myMbti,
-      count: trueCount(myMbtiBoard),
-    },
-  ].sort((a, b) => {
-    return b.count - a.count;
-  });
-
-  // 각 object에 ranking이라는 property attribute 추가하기
-  let addRanking = sortByCount.map((obj, i) => {
-    return { ranking: i + 1, ...obj };
-  });
-
-  // 앞 object와 value 비교해서 같으면 같은 등수로 바꿔주기
-  for (let i = 1; i < addRanking.length; i++) {
-    if (addRanking[i].count == addRanking[i - 1].count) {
-      addRanking[i].ranking = addRanking[i - 1].ranking;
-    }
+  if (!results) {
+    return <ResultsTransition show={showTransition} />;
   }
+  // if (!results && sameUser) {
+  //   return <ResultsTransition show={showTransition} />;
+  // } else if (!results && !sameUser) {
+  //   return <LoadingScreen />;
+  // }
 
-  // 1등한 유형을 realmbti로 놓기
-  let firstPlaceArray = addRanking.filter((obj) => obj.ranking === 1);
-  // console.log(firstPlaceArray);
-  let realMbtiArray = firstPlaceArray.map((obj) => obj.id);
-  let realMbtiShortArray = firstPlaceArray.map((obj) => obj.id.slice(0, 4));
-  // let realMbtiShortArrayWithoutOriginal = firstPlaceArray
-  //   .filter((obj) => obj.id != myMbti)
-  //   .flatMap((obj) => obj.id.slice(0, 4));
-  let realMbtiShortArrayWithoutOriginal = firstPlaceArray.flatMap((obj) =>
-    obj.id != myMbti ? [obj.id.slice(0, 4)] : []
+  // if (!results) {
+  //   return(
+  //     {sameUser ? (<ResultsTransition show={showTransition}/>) : ""});
+  // }
+
+  const myName = results.name;
+  const myMbti = results.myMbti[0].mbti;
+  // const myMbtiCount = getMyMbtiCount(results.bingoSubmissions, myMbti);
+  const bingoSubmissions = getSortedSubmissions(
+    results.bingoSubmissions,
+    myMbti
   );
 
-  let realMbtiCount = firstPlaceArray[0].count;
-  // secondPlace는 firstplace가 하나인 경우에만 해당...
-  let secondPlaceCount = addRanking[1].count;
-
-  let type = "";
-  if (myMbtiCount - 4 > secondPlaceCount) {
-    type = "definite";
-  } else if (myMbtiCount === realMbtiCount && firstPlaceArray.length === 1) {
-    type = "likely";
-  } else if (myMbtiCount === realMbtiCount && firstPlaceArray.length > 1) {
-    type = "tie";
-  } else if (myMbtiCount < realMbtiCount) {
-    type = "surprise";
-  }
-
-  let renderResultSummary = (
-    myMbti,
-    realMbtiShortArray,
-    // 왜 오히려 realMbtiShortArrayWithoutOriginal을 넣으면 의도대로 안 나오는 거지?
-    myMbtiCount,
-    realMbtiCount,
-    type
-  ) => {
-    // definite
-    if (type === "definite") {
-      return (
-        <div className="first-line">
-          <span className="accent color">{myMbti}</span>가{" "}
-          <span className="accent color">{myMbtiCount}개</span>로 압도적으로
-          많았어요!
-        </div>
-      );
-    }
-    // tie
-    else if (type === "tie") {
-      return (
-        <div className="first-line">
-          <span className="accent color">{myMbti}</span>와{" "}
-          <span className="accent color">
-            {realMbtiShortArrayWithoutOriginal.join(" & ")}
-          </span>{" "}
-          빙고판에서 모두 동일하게{" "}
-          <span className="accent color">{myMbtiCount}개</span> 선택했어요!
-        </div>
-      );
-    }
-    // surprise
-    else if (type === "surprise") {
-      return (
-        <div className="first-line">
-          원래 MBTI인 줄 알았던 <span className="accent color">{myMbti}</span>의
-          빙고에서는 <span className="accent color">{myMbtiCount}개</span>
-          를 선택한 반면,
-          <br />
-          <span className="accent color">
-            {realMbtiShortArrayWithoutOriginal.join(" & ")}
-          </span>{" "}
-          빙고에서는 그보다 더 많은{" "}
-          <span className="accent color">{realMbtiCount}개</span>를 선택했어요!
-        </div>
-      );
-    }
-    // likely
-    else if (type === "likely") {
-      return (
-        <div className="first-line">
-          원래 예상 MBTI인 <span className="accent color">{myMbti}</span> 빙고의
-          <br /> 선택 개수가{" "}
-          <span className="accent color">{myMbtiCount}개</span>로 가장 많았어요!
-        </div>
-      );
-    }
-  };
-
-  let renderReaction = (myMbti, realMbtiShortArray, type) => {
-    // definite
-    if (type === "definite") {
-      return (
-        <div className="reaction">
-          <img src={definite} loop="infinite" />
-          <div className="reaction-text accent highlight">
-            앞구르기 뒷구르기하면서 봐도 {myMbti}
-          </div>
-        </div>
-      );
-    }
-    // tie
-    else if (type === "tie") {
-      return (
-        <div className="reaction">
-          <img src={tie} />
-          <div className="reaction-text accent highlight">
-            내 안에 싸우고 있는 {firstPlaceArray.length}개의 자아
-            <br /> 나...어쩌면 {realMbtiShortArrayWithoutOriginal.join("나 ")}
-            일지도...?
-          </div>
-        </div>
-      );
-    }
-    // surprise
-    else if (type === "surprise") {
-      return (
-        <div className="reaction">
-          <img src={surprise} />
-          <div className="reaction-text accent highlight">
-            한평생 {myMbti}로 살아온 내가 사실은 {<br />}
-            {realMbtiShortArray.join("나 ")}...?!
-          </div>
-        </div>
-      );
-    }
-    // likely
-    else if (type === "likely") {
-      return (
-        <div className="reaction">
-          <img src={likely} />
-          <div className="reaction-text accent highlight">
-            MBTI는 과학이다— 아무래도 {myMbti} 맞는 듯~!
-          </div>
-        </div>
-      );
-    }
-  };
+  let firstPlaceArray = bingoSubmissions
+    .filter((obj) => obj.ranking === 1)
+    .map((obj) => obj.id);
 
   function originalBingoTitle(type) {
     switch (type) {
       case "surprise":
-        return "나의 MBTI(였던 것)";
-        break;
+        return (
+          <>
+            나의 MBTI<Aux> (였던 것)</Aux>
+          </>
+        );
       case "tie":
-        return "나의 MBTI(일 수도~ 아닐 수도~)";
-        break;
+        return (
+          <>
+            나의 MBTI<Aux> (일 수도~ 아닐 수도~)</Aux>
+            {/* 오리지널 MBTI */}
+          </>
+        );
       default:
         return "나의 MBTI 빙고";
     }
   }
 
-  // let renderMistypeRevealItem = (item, i) => {
-  //   let title = `${item.mbti}의 특징`;
-  //   let content = mbtiProfiles.find(
-  //     (obj) => obj.mbti == item.mbti
-  //   ).characteristics;
-  // .characteristics.join("");
-
-  let renderMistypeRevealItem = (item, i) => {
-    let title = `${item.mbti}의 특징`;
+  let renderMistype = (mistype, i) => {
+    let title = `${mistype.mbti}의 특징`;
     let stringArray = mbtiProfiles.find(
-      (obj) => obj.mbti == item.mbti
+      (obj) => obj.mbti === mistype.mbti
     ).characteristics;
     let content = stringArray.map((o) => (
-      <li className="bullet" key={o}>
-        {o}
-      </li>
+      <ListItem key={o}>
+        <BulletPoint>👉</BulletPoint>
+        <CharacteristicContent>{o}</CharacteristicContent>
+      </ListItem>
     ));
-    // 두가지 합치는 방법은 없나?
+
+    let mistypeMbti = mistype.mbti;
+    let mistypeMbtiShort = mistypeMbti.slice(0, 4);
 
     return (
-      <div className="mistype-container" key={`mistyperender${i}`}>
-        {/* <div className="mistype-title">MYSTERY BINGO #{i + 1}</div>
-        <div className="mbti accent highlight">{mistypeBoardArray[i].mbti}</div> */}
-        <span className="mistype-title">MYSTERY BINGO #{i + 1} </span>
-        <span className="mbti accent highlight">
-          {mistypeBoardArray[i].mbti}
-        </span>
+      <Margin key={`mistyperender${i}`}>
+        <MistypeTitle>
+          <NthMistype>MYSTERY BINGO #{i + 1} </NthMistype>
+          <MistypeName>{mistype.mbti}</MistypeName>
+        </MistypeTitle>
 
         <div className="mistype-bingo">
           <BingoBoard
-            mbti={mistypeBoardArray[i].mbti.slice(0, 4)}
-            board={mistypeBoardArray[i].board}
+            mbti={mistypeMbtiShort}
+            board={selectedToFiveByFive(
+              bingoSubmissions.find((obj) => obj.id === mistypeMbtiShort)
+                .selected
+            )}
+            items={addMbtiToItems(
+              results.bingoBoards.find((obj) => obj.mbti === mistypeMbtiShort)
+                .items,
+              mistypeMbtiShort
+            )}
             show={true}
             disableClick={true}
           />
@@ -296,155 +302,181 @@ function ResultsPage() {
         <div className="mistype-reason">
           <Accordion title={title} content={content} />
         </div>
-      </div>
+      </Margin>
     );
   };
 
   let renderMbtiImage = (item, i) => {
     let mbtiname = item;
-    let nickname = mbtiProfiles.find((obj) => obj.mbti == item).nickname;
+    let nickname = mbtiProfiles.find((obj) => obj.mbti === item).nickname;
     if (firstPlaceArray.length === 1) {
       return (
-        <div className="winner-item" key={`winner-item${i}`}>
-          <div className="winner-img-container single">
-            <img
-              className="winner-img single"
+        <WinnerItem key={`winner-item${i}`}>
+          <WinnerImgContainerSingle>
+            <WinnerImgSingle
               src={require(`../images/${mbtiname
                 .slice(0, 4)
                 .toLowerCase()}.png`)}
-              // width="300px"
             />
-          </div>
-          <div className="winner-mbtiname single ribbon">{mbtiname}</div>
-          <div className="winner-nickname single">{nickname}</div>
-        </div>
+          </WinnerImgContainerSingle>
+          <WinnerMbtiNametagSingle>{mbtiname}</WinnerMbtiNametagSingle>
+          <WinnerMbtiNicknameSingle>{nickname}</WinnerMbtiNicknameSingle>
+        </WinnerItem>
       );
     } else {
       return (
-        <div className="winner-item" key={`winner-item${i}`}>
-          <div className="winner-img-container">
-            <img
-              className="winner-img"
+        <WinnerItem key={`winner-item${i}`}>
+          <WinnerImgContainerMultiple>
+            <WinnerImgSingleMultiple
               src={require(`../images/${mbtiname
                 .slice(0, 4)
                 .toLowerCase()}.png`)}
-              // width="110px"
             />
-          </div>
-          <div className="winner-mbtiname ribbon">{mbtiname}</div>
-          <div className="winner-nickname">{nickname}</div>
-        </div>
+          </WinnerImgContainerMultiple>
+          <WinnerMbtiNametagMultiple>{mbtiname}</WinnerMbtiNametagMultiple>
+          <WinnerMbtiNicknameMultiple>{nickname}</WinnerMbtiNicknameMultiple>
+        </WinnerItem>
       );
     }
   };
 
+  // const sameUser = uid === localStorage.getItem("uid");
+
+  let renderButtons = () => {
+    return (
+      <Buttons>
+        {sameUser ? (
+          <>
+            <CuteButton
+              to="/"
+              onClick={(e) => {
+                // KakaoShare();
+                e.preventDefault();
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                  PositionedDialog("URL이 복사되었습니다!");
+                });
+                // Share.share({ title: "title", message: "blah" });
+              }}
+            >
+              나의 진짜 MBTI 공유하기
+            </CuteButton>
+          </>
+        ) : (
+          <CuteButton
+            to={"/"}
+            onClick={() => {
+              localStorage.removeItem("uid");
+            }}
+          >
+            나도 진짜 MBTI 확인하러 가기 ➜
+          </CuteButton>
+        )}
+
+        {sameUser ? (
+          <StartOverBtn
+            href="/"
+            rel="start-over"
+            to={"/"}
+            onClick={() => {
+              localStorage.removeItem("uid");
+            }}
+          >
+            다시 해보기
+          </StartOverBtn>
+        ) : (
+          ""
+        )}
+      </Buttons>
+    );
+  };
+
   return (
-    <>
-      {showTransition ? (
-        renderTransition()
-      ) : (
-        <>
-          <div className="result-intro">
-            <div className="headline">
-              <span className="purple">{myName}</span>님의{" "}
-              <span className="accent highlight">진짜 MBTI</span>는<br></br>
-              {/* <div className="winner-container">{renderMbtiImage()}</div> */}
-              <div className="winner-container">
-                {realMbtiArray.map(renderMbtiImage)}
-              </div>
-              {/* <span className="myrealmbti accent highlight">
-            {realMbtiArray.join(" or ")}
-          </span>{" "}
-          입니다 */}
-            </div>
+    <ThemeProvider theme={theme}>
+      <>
+        {/* {sameUser ? "" : renderButtons()} */}
+        <div className="result-intro">
+          <Headline>
+            <PurpleText>{myName}</PurpleText>님의{" "}
+            <HighlightedPinkText>진짜 MBTI</HighlightedPinkText>는<br></br>
+            <WinnerContainer>
+              {firstPlaceArray.map(renderMbtiImage)}
+            </WinnerContainer>
+          </Headline>
 
-            <div className="result-summary">
-              {renderResultSummary(
-                myMbti,
-                realMbtiShortArray,
-                myMbtiCount,
-                realMbtiCount,
-                type
-              )}
-            </div>
+          <ResultsSummary bingoSubmissions={bingoSubmissions} myMbti={myMbti} />
 
-            <div className="ranking">
-              <RankingBoard ranking={addRanking} />
-            </div>
+          {/* {sameUser ? "" : renderButtons()} */}
 
-            <div className="reaction">
-              {renderReaction(myMbti, realMbtiShortArray, type)}
-            </div>
-
-            {/* <div className="mistype-sentence">
-          {myMbti}들은 종종{" "}
-          <span className="mistype-names">{myMistypesIds.join(" & ")}</span>들과
-          혼동된다고 해요.
-        </div> */}
-            <div className="speech-bubble">
-              <span className="mbti-names">{myMbti}</span>들은 종종{" "}
-              <span className="mbti-names">
-                <span className="mbti-names mistype">
-                  {myMistypes.join(" & ")}
-                </span>
-                들과
-                <br />
-                혼동
-              </span>
-              된다고 해요.
-            </div>
-          </div>
-          <div className="original-bingo">
-            <div className="original-bingo-title accent highlight">
-              {/* {type === "likely" || type === "definite"
-            ? "나의 MBTI 빙고"
-            : "나의 MBTI(였던 것)"} */}
-              {originalBingoTitle(type)}
-            </div>
-            <BingoBoard
-              mbti={myMbti}
-              board={myMbtiBoard}
-              show={true}
-              disableClick={true}
-            />
-            <Accordion
-              title={`${myMbti}의 특징`}
-              content={mbtiProfiles
-                .find((obj) => obj.mbti == myMbti)
-                .characteristics.map((o) => (
-                  <li className="bullet" key={o}>
-                    {o}
-                  </li>
-                ))}
-            />
+          <div className="ranking">
+            <RankingBoard ranking={bingoSubmissions} />
           </div>
 
-          {/* <div className="mystery-reveal-title">
-        <div className="banner">
-          <span className="accent highlight">
-            <span className="emoji">🔮</span> 미스테리 빙고의<br></br> 정체를
-            공개합니다!{" "}
-          </span>
+          {/* {sameUser ? "" : renderButtons()} */}
+
+          <Margin>
+            <Reaction bingoSubmissions={bingoSubmissions} myMbti={myMbti} />
+          </Margin>
+
+          {sameUser ? "" : renderButtons()}
+
+          <SpeechBubble>
+            <BoldText>{myMbti}</BoldText>들은 종종{" "}
+            <BoldText>
+              <PurpleText>
+                {results.mistypes.map((obj) => obj.mbti).join(" & ")}
+              </PurpleText>
+              들과
+              <br />
+              혼동
+            </BoldText>
+            된다고 해요.
+          </SpeechBubble>
         </div>
-        <div className="down-arrow">
-          <img src={downarrow} width="50px" />
+
+        <OriginalBingoContainer>
+          <OriginalBingoTitle>
+            {originalBingoTitle(getType(bingoSubmissions, myMbti))}
+          </OriginalBingoTitle>
+
+          <BingoBoard
+            mbti={myMbti}
+            board={selectedToFiveByFive(
+              bingoSubmissions.find((obj) => obj.id === myMbti).selected
+            )}
+            items={addMbtiToItems(
+              results.bingoBoards.find((obj) => obj.mbti === myMbti).items,
+              myMbti
+            )}
+            show={true}
+            disableClick={true}
+          />
+          <Accordion
+            title={`${myMbti}의 특징`}
+            content={mbtiProfiles
+              .find((obj) => obj.mbti === myMbti)
+              .characteristics.map((o) => (
+                <ListItem key={o}>
+                  <BulletPoint>👉</BulletPoint>
+                  <CharacteristicContent>{o}</CharacteristicContent>
+                </ListItem>
+              ))}
+          />
+        </OriginalBingoContainer>
+
+        <SpeechBubble>
+          🔮 <BoldText>미스테리 빙고</BoldText>
+          의<br />
+          정체를 공개합니다!
+        </SpeechBubble>
+        <div className="mystery-bingo-reveal">
+          {results.mistypes.map(renderMistype)}
         </div>
-      </div> */}
-          <div className="mystery-reveal-title speech-bubble">
-            🔮{" "}
-            <span className="mystery-reveal-title accent">미스테리 빙고</span>의
-            정체를 공개합니다!
-          </div>
-          <div className="mystery-bingo-reveal">
-            {mistypeBoardArray.map(renderMistypeRevealItem)}
-          </div>
 
-          <div className="share-msg">나의 진짜 MBTI 공유하기</div>
+        {renderButtons()}
 
-          <div className="share-btn"></div>
-        </>
-      )}
-    </>
+        <AccordionSignature />
+      </>
+    </ThemeProvider>
   );
 }
 

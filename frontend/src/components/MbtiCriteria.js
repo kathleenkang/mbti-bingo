@@ -1,5 +1,75 @@
-import "./MbtiCriteria.css";
-import { useState } from "react";
+// import styled from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
+import leftarrow from "../images/arrow_left.png";
+import rightarrow from "../images/arrow_right.png";
+
+const CriteriaName = styled.div`
+  width: 80px;
+  color: #ec7eac;
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 28px;
+`;
+
+const Criteria = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 15px;
+`;
+
+const RadioButton = styled.input`
+  display: none;
+  cursor: pointer;
+
+  & + label {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    line-height: 45px;
+    font-size: 30px;
+    font-weight: bold;
+    border-radius: 10px;
+    border: 5px solid #9ab8fa;
+    background-color: white;
+    color: #2a2c38;
+  }
+
+  & + label:hover {
+    background-color: #9ab8fa;
+    color: white;
+  }
+
+  &:checked + label {
+    background-color: #9ab8fa;
+    color: white;
+  }
+`;
+
+const LightGrey = styled.div`
+  color: ${(props) => props.theme.lightGrey};
+`;
+
+const Arrow = styled(LightGrey)`
+  font-size: 25px;
+`;
+
+const OptionName = styled(LightGrey)`
+  font-size: 13px;
+`;
+
+const CriteriaNameContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 130px;
+  margin-left: 10px;
+  margin-right: 10px;
+`;
+
+const ImageContainer = styled.div`
+  position: relative;
+  bottom: -5.5px;
+`;
 
 function MbtiCriteria({
   criteria,
@@ -13,12 +83,11 @@ function MbtiCriteria({
 }) {
   return (
     <>
-      <div className="criteria">
-        <div className="option-name">{leftoptionlabel}</div>
+      <Criteria>
+        <OptionName>{leftoptionlabel}</OptionName>
         <div className="left-btn">
-          <input
+          <RadioButton
             id={leftoption}
-            className="radio-btn"
             type="radio"
             value={leftoption}
             name={criteria}
@@ -28,15 +97,18 @@ function MbtiCriteria({
           />
           <label htmlFor={leftoption}>{leftoption}</label>
         </div>
-        <div className="criteria-name-container">
-          <div className="arrow">⬅</div>
-          <div className="criteria-name">{criterialabel}</div>
-          <div className="arrow">➡</div>
-        </div>
+        <CriteriaNameContainer>
+          <ImageContainer>
+            <img src={leftarrow} width={"17px"} />
+          </ImageContainer>
+          <CriteriaName>{criterialabel}</CriteriaName>
+          <ImageContainer>
+            <img src={rightarrow} width={"17px"} />
+          </ImageContainer>{" "}
+        </CriteriaNameContainer>
         <div className="right-btn">
-          <input
+          <RadioButton
             id={rightoption}
-            className="radio-btn"
             type="radio"
             value={rightoption}
             name={criteria}
@@ -46,46 +118,10 @@ function MbtiCriteria({
           />
           <label htmlFor={rightoption}>{rightoption}</label>
         </div>
-        <div className="option-name">{rightoptionlabel}</div>
-      </div>
+        <OptionName>{rightoptionlabel}</OptionName>
+      </Criteria>
     </>
   );
-
-  //   <>
-  //   <div className="criteria">
-  //     <div className="option-name">{optionlabel.left}</div>
-  //     <div className="option-btn">
-  //       <input
-  //         id={option.left}
-  //         className="radio-btn"
-  //         type="radio"
-  //         value={option.left}
-  //         name={criteria}
-  //         onClick={handleChange}
-  //       />
-  //       <label htmlFor={option.left}>{option.left}</label>
-  //     </div>
-  //     <div className="criteria-name-container">
-  //       <div className="arrow">⬅</div>
-  //       <div className="criteria-name">{criterialabel}</div>
-  //       <div className="arrow">➡</div>
-  //     </div>
-  //     <div className="right-btn">
-  //       <input
-  //         id={option.right}
-  //         className="radio-btn"
-  //         type="radio"
-  //         value={option.right}
-  //         name={criteria}
-  //         onClick={handleChange}
-  //       />
-  //       <label htmlFor={option.right}>{option.right}</label>
-  //     </div>
-  //     <div className="option-name">{optionlabel.right}</div>
-  //     {/* <h1>{criterialabel[0]}</h1> */}
-  //     {/* <h1>{e.target.value}</h1> */}
-  //   </div>
-  // </>
 }
 
 export default MbtiCriteria;

@@ -9,10 +9,11 @@ import MysteryBingoPage from "./pages/MysteryBingoPage";
 import ResultsPage from "./pages/ResultsPage";
 import bingodata from "./data/bingoContentData.json";
 import Container from "./components/styles/Container";
+import { UserProvider } from "./contexts/UserContext";
 
 function App() {
   return (
-    <>
+    <UserProvider>
       <GlobalStyle />
       <Container>
         <BrowserRouter>
@@ -30,11 +31,11 @@ function App() {
             {/* <Route path=":mysteryMbtiBingo" element={<MysteryBingoPage />} /> */}
             {/* <Route path="/mysteryMbtiBingo/:id" element={<MysteryBingoPage />} /> */}
             <Route path="mysterybingo" element={<MysteryBingoPage />} />
-            <Route path="results" element={<ResultsPage />} />
+            <Route path="/users/:uid/results" element={<ResultsPage />} />
           </Routes>
         </BrowserRouter>
       </Container>
-    </>
+    </UserProvider>
   );
 }
 
